@@ -46,7 +46,17 @@ export default function Scene3D() {
         const box = new THREE.Box3().setFromObject(car)
         const center = box.getCenter(new THREE.Vector3())
         car.position.sub(center)
-        car.scale.set(1.5, 1.5, 1.5)
+        // Responsive scale
+        let scale = 1.2
+        const width = window.innerWidth
+        if (width >= 1200) {
+          scale = 1.5 // large screens
+        } else if (width >= 768) {
+          scale = 1.3 // mid screens
+        } else {
+          scale = 1.1 // mobile
+        }
+        car.scale.set(scale, scale, scale)
         // Create group and add car
         model = new THREE.Group()
         model.add(car)
