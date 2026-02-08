@@ -14,7 +14,7 @@ export default function Scene3D() {
 
     // Camera
     const camera = new THREE.PerspectiveCamera(
-      75,
+      40,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
@@ -50,7 +50,7 @@ export default function Scene3D() {
         let scale = 1.2
         const width = window.innerWidth
         if (width >= 1200) {
-          scale = 1.5 // large screens
+          scale = 1.4 // large screens
         } else if (width >= 768) {
           scale = 1.3 // mid screens
         } else {
@@ -62,7 +62,7 @@ export default function Scene3D() {
         model.add(car)
         scene.add(model)
         const size = box.getSize(new THREE.Vector3()).length()
-        camera.position.set(0, 0, size * 1.1)
+        camera.position.set(0, 0, size * 1.7)
         camera.lookAt(0, 0, 0)
       },
       undefined,
@@ -85,14 +85,50 @@ export default function Scene3D() {
     let isAnimating = false
 
     // Animation loop
+    // const animate = () => {
+    //   frameId = requestAnimationFrame(animate)
+    //   /*if (isAnimating) {
+    //     cube.rotation.x += 0.01
+    //     cube.rotation.y += 0.01*/
+    //   if (isAnimating && model) {
+    //     model.rotation.y += 0.03 // Faster rotation
+    //   }
+    //   renderer.render(scene, camera)
+    // }
+    // animate()
+
+    // User interaction: click, hold, and move to rotate model
+    let isDragging = false
+    let lastX = 0
+    let lastY = 0
+
+    const handlePointerDown = (event: PointerEvent) => {
+      isDragging = true
+      lastX = event.clientX
+      lastY = event.clientY
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!isDragging || !model) return;
+      const deltaX = event.clientX - lastX
+      const deltaY = event.clientY - lastY
+      model.rotation.y += deltaX * 0.01
+      model.rotation.x += deltaY * 0.01
+      lastX = event.clientX
+      lastY = event.clientY
+    }
+
+    const handlePointerUp = () => {
+      isDragging = false;
+    }
+
+    renderer.domElement.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+
+    // Animation loop for rendering only
     const animate = () => {
       frameId = requestAnimationFrame(animate)
-      /*if (isAnimating) {
-        cube.rotation.x += 0.01
-        cube.rotation.y += 0.01*/
-      if (isAnimating && model) {
-        model.rotation.y += 0.03 // Faster rotation
-      }
       renderer.render(scene, camera)
     }
     animate()
@@ -120,6 +156,9 @@ export default function Scene3D() {
       cancelAnimationFrame(frameId)
       window.removeEventListener("resize", handleResize)
       window.removeEventListener("scroll", onScroll)
+      renderer.domElement.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
       containerRef.current?.removeChild(renderer.domElement)
       renderer.dispose()
       /*geometry.dispose()
