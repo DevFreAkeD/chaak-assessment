@@ -13,12 +13,16 @@ export default function App() {
     <main className="relative w-screen bg-black text-white">
       {/* Hero Section */}
       <section className="relative h-screen overflow-hidden">
-        <Hero onExplore={handleExplore} />
+           <div className="relative z-20 flex items-center justify-center h-full">
+             <Hero onExplore={handleExplore} />
+           </div>
       </section>
 
       {/* Scene 3D */}
       <section className="h-screen flex items-center justify-center">
-        <Scene3D />
+           <div className="absolute inset-0 z-10">
+             <Scene3D />
+           </div>
       </section>
     </main>
   )
