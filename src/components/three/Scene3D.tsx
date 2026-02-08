@@ -1,14 +1,9 @@
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-gsap.registerPlugin(ScrollTrigger)
 
 export default function Scene3D() {
   const containerRef = useRef<HTMLDivElement>(null)
-  // Ref for the car model group
-  const modelRef = useRef<THREE.Group | null>(null)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -66,30 +61,9 @@ export default function Scene3D() {
         model = new THREE.Group()
         model.add(car)
         scene.add(model)
-        modelRef.current = model
         const size = box.getSize(new THREE.Vector3()).length()
-        camera.position.set(0, 0, size * 2.3)
+        camera.position.set(0, 0, size * 1.7)
         camera.lookAt(0, 0, 0)
-
-        // GSAP pop-up animation
-        model.scale.set(0.01, 0.01, 0.01)
-        gsap.to(model.scale, {
-          x: scale,
-          y: scale,
-          z: scale,
-          duration: 1.1,
-          ease: "back.out(1.4)",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play reverse play reverse",
-            onLeaveBack: () => {
-              // Reset scale to tiny so it can pop again
-              if (model) model.scale.set(0.01, 0.01, 0.01)
-            },
-          },
-        })
       },
       undefined,
       (error) => {
@@ -105,23 +79,23 @@ export default function Scene3D() {
     directionalLight.position.set(5, 5, 5)
     scene.add(directionalLight)
 
+
     // Animation state
     let frameId: number
+    let isAnimating = false
 
     // Animation loop
-    const animate = () => {
-      /*if (isAnimating) {
-        cube.rotation.x += 0.01
-        cube.rotation.y += 0.01
-        if (isAnimating && model) {
-          model.rotation.y += 0.03 // Faster rotation
-        }
-      renderer.render(scene, camera)
-    }*/
-      frameId = requestAnimationFrame(animate)
-      renderer.render(scene, camera)
-    }
-    animate()
+    // const animate = () => {
+    //   frameId = requestAnimationFrame(animate)
+    //   /*if (isAnimating) {
+    //     cube.rotation.x += 0.01
+    //     cube.rotation.y += 0.01*/
+    //   if (isAnimating && model) {
+    //     model.rotation.y += 0.03 // Faster rotation
+    //   }
+    //   renderer.render(scene, camera)
+    // }
+    // animate()
 
     // User interaction: click, hold, and move to rotate model
     let isDragging = false
@@ -135,11 +109,11 @@ export default function Scene3D() {
     }
 
     const handlePointerMove = (event: PointerEvent) => {
-      if (!isDragging || !modelRef.current) return;
+      if (!isDragging || !model) return;
       const deltaX = event.clientX - lastX
       const deltaY = event.clientY - lastY
-      modelRef.current.rotation.y += deltaX * 0.01
-      modelRef.current.rotation.x += deltaY * 0.01
+      model.rotation.y += deltaX * 0.01
+      model.rotation.x += deltaY * 0.01
       lastX = event.clientX
       lastY = event.clientY
     }
@@ -151,6 +125,23 @@ export default function Scene3D() {
     renderer.domElement.addEventListener('pointerdown', handlePointerDown)
     window.addEventListener('pointermove', handlePointerMove)
     window.addEventListener('pointerup', handlePointerUp)
+
+    // Animation loop for rendering only
+    const animate = () => {
+      frameId = requestAnimationFrame(animate)
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    // Scroll trigger
+    const onScroll = () => {
+      if (window.scrollY > 10) {
+        isAnimating = true
+      } else {
+        isAnimating = false
+      }
+    }
+    window.addEventListener("scroll", onScroll)
 
     // Resize handler
     const handleResize = () => {
@@ -164,16 +155,17 @@ export default function Scene3D() {
     return () => {
       cancelAnimationFrame(frameId)
       window.removeEventListener("resize", handleResize)
+      window.removeEventListener("scroll", onScroll)
       renderer.domElement.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
-      if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.getAll().forEach(t => t.kill())
-      }
       containerRef.current?.removeChild(renderer.domElement)
       renderer.dispose()
-      if (modelRef.current) {
-        scene.remove(modelRef.current)
+      /*geometry.dispose()
+      material.dispose()*/
+      // Remove model from scene
+      if (model) {
+        scene.remove(model)
       }
     }
   }, [])
