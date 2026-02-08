@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
-export default function Scene3D() {
+export default function Scene3D({ className = "" }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export default function Scene3D() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0"
+      className={className}
     />
   )
 }
