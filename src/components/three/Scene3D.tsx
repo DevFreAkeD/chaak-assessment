@@ -82,7 +82,7 @@ export default function Scene3D() {
 
     // Animation state
     let frameId: number
-    let isAnimating = false
+      // let isAnimating = false
 
     // Animation loop
     // const animate = () => {
@@ -134,14 +134,14 @@ export default function Scene3D() {
     animate()
 
     // Scroll trigger
-    const onScroll = () => {
+    /*const onScroll = () => {
       if (window.scrollY > 10) {
         isAnimating = true
       } else {
         isAnimating = false
       }
     }
-    window.addEventListener("scroll", onScroll)
+    window.addEventListener("scroll", onScroll)*/
 
     // Resize handler
     const handleResize = () => {
@@ -155,7 +155,7 @@ export default function Scene3D() {
     return () => {
       cancelAnimationFrame(frameId)
       window.removeEventListener("resize", handleResize)
-      window.removeEventListener("scroll", onScroll)
+      //window.removeEventListener("scroll", onScroll)
       renderer.domElement.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
