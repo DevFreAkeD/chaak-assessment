@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 export default function Scene3D() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,14 +27,39 @@ export default function Scene3D() {
     containerRef.current.appendChild(renderer.domElement)
 
     // Object
-    const geometry = new THREE.BoxGeometry()
+    /*const geometry = new THREE.BoxGeometry()
     const material = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.4,
       metalness: 0.2,
     })
     const cube = new THREE.Mesh(geometry, material)
-    scene.add(cube)
+    scene.add(cube)*/
+
+    // Load GLB model
+    let model: THREE.Group | null = null
+    const loader = new GLTFLoader()
+    loader.load(
+      "/bmw_m5_cs.glb",
+      (gltf) => {
+        const car = gltf.scene
+        const box = new THREE.Box3().setFromObject(car)
+        const center = box.getCenter(new THREE.Vector3())
+        car.position.sub(center)
+        car.scale.set(1.5, 1.5, 1.5)
+        // Create group and add car
+        model = new THREE.Group()
+        model.add(car)
+        scene.add(model)
+        const size = box.getSize(new THREE.Vector3()).length()
+        camera.position.set(0, 0, size * 1.1)
+        camera.lookAt(0, 0, 0)
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading GLB:", error)
+      }
+    )
 
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
@@ -51,9 +77,11 @@ export default function Scene3D() {
     // Animation loop
     const animate = () => {
       frameId = requestAnimationFrame(animate)
-      if (isAnimating) {
+      /*if (isAnimating) {
         cube.rotation.x += 0.01
-        cube.rotation.y += 0.01
+        cube.rotation.y += 0.01*/
+      if (isAnimating && model) {
+        model.rotation.y += 0.03 // Faster rotation
       }
       renderer.render(scene, camera)
     }
@@ -84,8 +112,12 @@ export default function Scene3D() {
       window.removeEventListener("scroll", onScroll)
       containerRef.current?.removeChild(renderer.domElement)
       renderer.dispose()
-      geometry.dispose()
-      material.dispose()
+      /*geometry.dispose()
+      material.dispose()*/
+      // Remove model from scene
+      if (model) {
+        scene.remove(model)
+      }
     }
   }, [])
 
