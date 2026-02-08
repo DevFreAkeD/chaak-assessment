@@ -43,15 +43,31 @@ export default function Scene3D() {
     directionalLight.position.set(5, 5, 5)
     scene.add(directionalLight)
 
-    // Animation
+
+    // Animation state
     let frameId: number
+    let isAnimating = false
+
+    // Animation loop
     const animate = () => {
       frameId = requestAnimationFrame(animate)
-      cube.rotation.x += 0.01
-      cube.rotation.y += 0.01
+      if (isAnimating) {
+        cube.rotation.x += 0.01
+        cube.rotation.y += 0.01
+      }
       renderer.render(scene, camera)
     }
     animate()
+
+    // Scroll trigger
+    const onScroll = () => {
+      if (window.scrollY > 10) {
+        isAnimating = true
+      } else {
+        isAnimating = false
+      }
+    }
+    window.addEventListener("scroll", onScroll)
 
     // Resize handler
     const handleResize = () => {
@@ -65,6 +81,7 @@ export default function Scene3D() {
     return () => {
       cancelAnimationFrame(frameId)
       window.removeEventListener("resize", handleResize)
+      window.removeEventListener("scroll", onScroll)
       containerRef.current?.removeChild(renderer.domElement)
       renderer.dispose()
       geometry.dispose()
