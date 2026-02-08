@@ -13,7 +13,6 @@ export default function App() {
     <main className="relative w-screen bg-black text-white">
       {/* Hero Section */}
       <section className="relative h-screen overflow-hidden">
-        <Scene3D />
         <Hero onExplore={handleExplore} />
       </section>
 
